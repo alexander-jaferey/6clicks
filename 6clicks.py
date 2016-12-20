@@ -24,14 +24,15 @@ else:
 	sourceArticle = response.read()
 
 '''
-Html source -> Success or Fail
+Html source, Clicks left -> Success or Fail
 
 From html source, present links to user.
 Will either return a success or failure if correct article is not reached in
-6 clicks.
+the given amount of clicks.
 
 '''
-def PickLinksIn(articleSource):
+def PickLinksIn(articleSource, CLICKS):
+
 	if CLICKS <= 1:
 		print "Sorry, you did not reach your article in the clicks allotted.."
 		return "Fail!"
@@ -39,22 +40,43 @@ def PickLinksIn(articleSource):
 
 	soup = BeautifulSoup(articleSource, 'html.parser')
 	print "Which link will you follow?"
+
+	# Gets the text and link of every anchor tag within an article that refs
+	# another wiki page.
 	links = [{
 			  "name": a.string,    \
 			  "link": a.get('href')\
 			 } \
-			 for a in soup.find_all('a')]
+			 for a in soup.find_all('a')\
+			 if a.get('href') is not None and "/wiki/" in a.get('href')\
+			    and  a.string is not None]
+
+	# Iterates through each link to show user the options.
 	counter = 1
 	for a in links:
-		print counter + " : " + a['name']
+		try:
+			print str(counter) + " : " + a['name']
+			print "\t" + a['link'][:50] + "...."
+			counter += 1
+		except:
+			continue
 
-	link_number = raw_input("Number?\n")
+	# Gets the user input
+	link_number = int(raw_input("Number?\n"))
+	# The link the user referenced
 	link_href = links[link_number-1]['link']
 
+	# If the user picked the destination, terminate
 	if USERDEST == link_href:
 		print "YOU DUNNIT!"
 		return "Success!"
+
+	# Otherwise, recurr!
+	if link_href[:5] == "/wiki":
+		link_href = "http://en.wikipedia.org" + link_href
 	response = urllib2.urlopen(link_href)
 	sourceArticle = response.read()
 
-	PickLinksIn(sourceArticle)
+	PickLinksIn(sourceArticle, CLICKS)
+
+PickLinksIn(sourceArticle, CLICKS)
