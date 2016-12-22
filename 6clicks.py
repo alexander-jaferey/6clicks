@@ -40,7 +40,7 @@ def PickLinksIn(articleSource, CLICKS):
 
 	# If the user picked the destination, terminate
 	if DESTTITLE == soup.title:
-		print "YOU DUNNIT!"
+		print "Success!"
 		return "Success!"
 
 	# If user ran out of clicks, terminate
